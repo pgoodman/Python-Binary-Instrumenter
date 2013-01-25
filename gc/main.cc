@@ -47,10 +47,14 @@ int main(int argc, char **argv) throw() {
         (pthread_func_t *) main_thread_func,
         &args);
 
-    for(; !MAIN_THREAD_DONE.load(); ) {
+    for(; ; ) {
         usleep(1000);
-
+        
         // TODO: do a concurrent leak check!
+
+        if(MAIN_THREAD_DONE.load()) {
+            break;
+        }
     }
 
     // TODO: tear down GC state
