@@ -2,7 +2,7 @@
 CXX_FLAGS = -std=c++11 -stdlib=libc++ -Wall -Werror -Wextra
 CXX_FLAGS += -pedantic -I./
 
-GC_OBJS = bin/gc/main.o
+GC_OBJS = bin/gc/main.o bin/gc/pthread.o
 
 SRC_OBJS = bin/src/main.o
 

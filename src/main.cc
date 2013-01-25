@@ -1,5 +1,6 @@
 
 #include <cstdio>
+#include "gc/pthread.h"
 
 int fib(int i) {
     if(0 == i) {

@@ -1,9 +1,12 @@
 
 #include <atomic>
 
-#include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "gc/list.h"
+#include "gc/pthread.h"
+#include "gc/thread_info.h"
 
 extern int program_main(int, char **);
 
@@ -29,9 +32,16 @@ namespace {
     }
 }
 
+namespace gc {
+
+    /// list of threads.
+    atomic_list<thread_info> THREADS;
+
+}
+
 int main(int argc, char **argv) throw() {
 
-    typedef void *(pthread_func_t)(void *);
+    typedef void *(thread_routine)(void *);
 
     main_thread_args args = {
         argc, argv, 0
@@ -41,10 +51,10 @@ int main(int argc, char **argv) throw() {
     pthread_attr_t main_thread_attr;
 
     pthread_attr_init(&main_thread_attr);
-    pthread_create(
+    gc::pthread_create(
         &main_thread,
         &main_thread_attr,
-        (pthread_func_t *) main_thread_func,
+        (thread_routine *) main_thread_func,
         &args);
 
     for(; ; ) {
