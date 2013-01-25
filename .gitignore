@@ -1,0 +1,17 @@
+*.out
+*.o
+*.S
+*.pyc
+
+.settings
+.project
+.cproject
+.DS_Store
+.tmp_versions
+
+program.out.*
+
+bin/src/*.S
+bin/src/*.o
+bin/gc/*.o
+
