@@ -8,6 +8,14 @@ BASIC_BLOCK = re.compile(r"#\s*BB(.*):(.*)")
 FUNC_CALL = re.compile(r"\s*call(.*)")
 FUNC_RETURN = re.compile(r"\s*ret(.*)")
 
+def has_instructions(lines):
+    for line in lines:
+        if not line.startswith(".") \
+        and not line.startswith("_") \
+        and not line.startswith("#"):
+            return True
+    return False
+
 def instrument_assembly(in_lines, out_file):
     global BASIC_BLOCK, FUNC_CALL, FUNC_RETURN
     out_line_groups = [[]]
@@ -56,6 +64,9 @@ def instrument_assembly(in_lines, out_file):
 
     # visit each basic block
     for group in basic_block_groups:
+        if not has_instructions(out_line_groups[group]):
+            continue
+        
         out_line_groups[group] = instrument.visit_basic_block(
             out_line_groups[group])
 
