@@ -20,6 +20,12 @@ namespace gc {
         void *__restrict __arg
     );
 
+    /// Wrapped version of `pthread_join`.
+    int pthread_join (
+    	pthread_t __th,
+    	void **__thread_return
+    );
+
 }
 
 

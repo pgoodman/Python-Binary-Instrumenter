@@ -5,9 +5,13 @@
  *      Author: pag
  */
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "gc/pthread.h"
 #include "gc/thread_info.h"
 #include "gc/list.h"
+
 
 namespace gc {
 
@@ -33,6 +37,7 @@ namespace gc {
     /// Small wrapper around a thread routine.
     void *thread_routine_func(thread_data *data) throw() {
         INFO = data->info;
+        printf("thread function callback wrapper\n");
         void *ret(data->func(data->data));
         data->info->is_dead.store(true);
         delete data;
@@ -63,6 +68,20 @@ namespace gc {
         data = nullptr;
         return ret;
     }
+
+    	/// wrapped version of `pthread_join`. The responsibility of this function
+        /// is to properly free the thread local slots.
+        int pthread_join (
+        		pthread_t __th,
+        		void **__thread_return) {
+
+            // run the original.
+            int ret(::pthread_join(
+                __th,
+                __thread_return));
+
+            return ret;
+        }
 }
 
 

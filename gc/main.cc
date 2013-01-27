@@ -2,6 +2,7 @@
 #include <atomic>
 
 #include <sys/types.h>
+#include <cstdio>
 #include <unistd.h>
 
 #include "gc/list.h"
@@ -9,6 +10,9 @@
 #include "gc/thread_info.h"
 
 extern int program_main(int, char **);
+
+#define MAIN_THREAD_FUNC(func) main_thread_func##func;
+
 
 namespace {
 
@@ -25,11 +29,14 @@ namespace {
         args->return_value = program_main(
             args->argc,
             args->argv);
-
+        while(1) {
+        	//printf("running child thread\n");
+        }
         MAIN_THREAD_DONE.store(true);
 
         return nullptr;
     }
+
 }
 
 namespace gc {
@@ -39,7 +46,14 @@ namespace gc {
 
 }
 
+#define NUM_THREADS 8
+
 int main(int argc, char **argv) throw() {
+
+	int ret_val[NUM_THREADS];
+	pthread_t main_thread[NUM_THREADS];
+	pthread_attr_t main_thread_attr[NUM_THREADS];
+	unsigned int i = 0;
 
     typedef void *(thread_routine)(void *);
 
@@ -47,26 +61,43 @@ int main(int argc, char **argv) throw() {
         argc, argv, 0
     };
 
-    pthread_t main_thread = pthread_t();
-    pthread_attr_t main_thread_attr;
+    for(i = 0; i < NUM_THREADS; i++)
+    {
+    	main_thread[i] = pthread_t();
+    	pthread_attr_init(&main_thread_attr[i]);
 
-    pthread_attr_init(&main_thread_attr);
-    gc::pthread_create(
-        &main_thread,
-        &main_thread_attr,
-        (thread_routine *) main_thread_func,
-        &args);
+    	ret_val[i] = gc::pthread_create(
+    					&main_thread[i],
+    					&main_thread_attr[i],
+    					(thread_routine *) main_thread_func,//MAIN_THREAD_FUNC(1),
+    					&args);
+    }
+
+   // printf("do concurrent_check place 1\n");
 
     for(; ; ) {
         usleep(1000);
         
+      //  printf("do concurrent_check\n");
         // TODO: do a concurrent leak check!
 
         if(MAIN_THREAD_DONE.load()) {
-            break;
+           // break;
         }
+
+    }
+
+    for(i = 0; i < NUM_THREADS; i++) {
+    	ret_val[i] = gc::pthread_join(
+    					main_thread[i],
+    					NULL);
     }
 
     // TODO: tear down GC state
     return args.return_value;
+}
+
+extern "C" {
+	int __cxa_call_unexpected;
+	int __gxx_personality_v0;
 }
