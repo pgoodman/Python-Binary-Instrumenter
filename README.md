@@ -1,17 +1,9 @@
-Prototype of the Granary-Based Concurrent GC
-============================================
+Prototype of Python Binary Instrumenter
+=======================================
 
-This is a user space prototype for developing some of the concepts that will be
-needed to implement our GC.
-
-State Space
------------
-
-  * In kernel code, with no module activation frame(s) on the stack.
-  * In kernel code, with module activation frame(s) on the stack. This case
-    requires acknowledging that while a snapshot might be taken, the kernel
-    code return into module code.
-  * At the beginning of a basic block.
-  * In the middle of a basic block.
-  * At the end of a basic block.
-  * Between two basic blocks (e.g. IBL, dispatcher, etc.).
+This is a user space prototype for doing simple binary instrumentation with Python. This prototype
+works by compiling some code to assembly with `clang`. `clang` annotates the generated assembly with
+basic block information. A python script then separates the basic blocks, and exposes them as lists
+of strings (assembly instructions or assembly directives). The python script then modifies these
+instruction lists, and spits out modified (instrumented) lists of instructions, for compiling by
+`clang`.
